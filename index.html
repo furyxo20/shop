@@ -49,6 +49,8 @@ body::before{content:"";position:fixed;inset:-20%;z-index:-1;background:radial-g
 .bd{position:absolute;top:0;right:22%;background:var(--bad);color:#fff;font-size:10px;border-radius:99px;padding:1px 6px;font-style:normal;animation:pulse 2s infinite}
 .toast{position:fixed;left:50%;bottom:calc(100px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--card2);color:var(--tx);padding:10px 18px;border-radius:99px;z-index:99;box-shadow:0 8px 24px #0006;animation:toast 2.3s both}
 .call{width:100%;margin:4px 0 10px;padding:15px;font-size:17px;background:linear-gradient(135deg,#0ea5e9,#2563eb);box-shadow:0 6px 18px #2563eb44}
+.row span button{padding:9px 11px}
+.ph{max-width:100%;max-height:150px;border-radius:12px;margin:6px 0}
 </style></head><body>
 <header><div class="logo">⚡</div><div><h1>MAX ELECTRONICS</h1><small>Repair &amp; Stock Manager</small></div><small id="sy" style="margin-left:auto">📴 Local</small></header>
 
@@ -57,7 +59,7 @@ body::before{content:"";position:fixed;inset:-20%;z-index:-1;background:radial-g
 <section id="t-stock" class="tab"><input id="q" placeholder="🔍 සොයන්න..." oninput="rStock()"><div id="stockList"></div></section>
 <section id="t-sales" class="tab"><div id="salesList"></div></section>
 <section id="t-rep" class="tab"><input id="rq" placeholder="🔍 බිල් අංකය / නම / phone / device" oninput="rRep()"><div id="repList"></div></section>
-<section id="t-tools" class="tab">
+<section id="t-tools" class="tab"><div class="card" id="expCard"></div><div class="card" id="debtCard"></div><div class="card" id="supCard"></div><div class="two" style="margin:8px 0"><button class="g" onclick="openC()">👥 Customers</button><button class="g" onclick="csv()">📄 Sales CSV</button></div>
  <div class="card"><b>💹 Price Calculator</b>
   <label>මිලට ගත් ගාන (Cost)</label><input id="c1" type="number" oninput="calc('c')">
   <label>ලාභ ප්‍රතිශතය %</label><input id="c2" type="number" oninput="calc('p')">
@@ -91,7 +93,7 @@ async function rm(c,id){try{await fs.collection(c).doc(id).delete()}catch(e){ale
 function live(){au.onAuthStateChanged(u=>{subs.forEach(f=>f());subs=[];
  if(!u){db=null;$('lg').style.display='flex';$('sy').textContent='🔒';return}
  db=1;$('lg').style.display='none';$('sy').textContent='🟢 Live sync';
- ['items','sales','reps'].forEach(n=>subs.push(fs.collection(n).onSnapshot(s=>{D[n]=s.docs.map(x=>x.data());render()},e=>{$('sy').textContent='🔴 Sync error'})))})}
+ ['items','sales','reps','exp','debt','sup'].forEach(n=>subs.push(fs.collection(n).onSnapshot(s=>{D[n]=s.docs.map(x=>x.data());render()},e=>{$('sy').textContent='🔴 Sync error'})))})}
 async function login(){$('le').textContent='';try{await au.signInWithEmailAndPassword($('lu').value.trim(),$('lp').value)}catch(e){$('le').textContent='Email/Password වැරදියි ('+(e.code||'')+')'}}
 function logout(){au.signOut()}
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,5);
@@ -99,7 +101,7 @@ const today=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth
 const tabs=[['home','🏠','Home'],['stock','📦','Stock'],['sales','🧾','Sales'],['rep','🔧','Repairs'],['tools','🧮','Tools']];
 $('nav').innerHTML=tabs.map(t=>`<button id="n-${t[0]}" onclick="go('${t[0]}')"><span>${t[1]}</span>${t[2]}</button>`).join('');
 function go(t){tab=t;document.querySelectorAll('.tab').forEach(e=>e.classList.remove('on'));$('t-'+t).classList.add('on');
- tabs.forEach(x=>$('n-'+x[0]).classList.toggle('on',x[0]===t));$('fab').style.display=['home','sales','tools'].includes(t)?'none':'block';render();scrollTo(0,0)}
+ tabs.forEach(x=>$('n-'+x[0]).classList.toggle('on',x[0]===t));$('fab').style.display=['sales','tools'].includes(t)?'none':'block';$('fab').textContent=t==='home'?'🛒':'＋';render();scrollTo(0,0)}
 function render(){rHome();rStock();rSales();rRep()}
 const low=i=>i.qty<=i.min;
 function rHome(){
@@ -128,10 +130,10 @@ function rSales(){
 function rRep(){
  const c={Received:'wn',Repairing:'wn',Ready:'ok',Delivered:'ok'};
  $('repList').innerHTML=[...D.reps].reverse().map(r=>`<div class="card"><div class="row"><b>${r.bill?'#'+E(r.bill)+' • ':''}${E(r.device)}</b><span class="pill ${c[r.status]}">${r.status}</span></div>
- <small>${E(r.cust)} ${E(r.phone)} • ${r.date}</small><p style="margin:6px 0">${E(r.issue)}</p>${r.phone?`<button class="call" onclick="callC('${r.id}')">📞 Call කරන්න • ${E(r.phone)}</button>`:''}<div class="row"><b>${R(r.charge)}</b><button class="g" onclick="openR('${r.id}')">Edit</button></div></div>`).join('')||'<p class="mu" style="text-align:center;margin-top:30px">Repairs නෑ. ＋ ඔබන්න</p>'}
+ <small>${E(r.cust)} ${E(r.phone)} • ${r.date}</small><p style="margin:6px 0">${E(r.issue)}</p>${extra(r)}${r.phone?`<button class="call" onclick="callC('${r.id}')">📞 Call කරන්න • ${E(r.phone)}</button>`:''}<div class="row"><b>${R(r.charge)}</b><button class="g" onclick="openR('${r.id}')">Edit</button></div></div>`).join('')||'<p class="mu" style="text-align:center;margin-top:30px">Repairs නෑ. ＋ ඔබන්න</p>'}
 function cl(){$('m').classList.remove('on')}
 function sh(h){$('sh').innerHTML=h;$('m').classList.add('on')}
-function openF(id){if(tab==='rep')return openR();
+function openF(id){if(tab==='home')return quick();if(tab==='rep')return openR();
  const i=D.items.find(x=>x.id===id)||{name:'',cat:'',cost:'',retail:'',sale:'',qty:'',min:5};
  sh(`<h3>${id?'Edit':'අලුත් Item'}</h3>
  <label>නම</label><input id="f1" value="${E(i.name)}">
@@ -156,20 +158,20 @@ function sell(id){const i=D.items.find(x=>x.id===id);if(!i.qty)return alert('Sto
 function doSell(id){const i=D.items.find(x=>x.id===id),q=Math.min(+$('s1').value||1,i.qty);
  i.qty-=q;put('items',i);put('sales',{id:uid(),name:i.name,qty:q,price:+$('s2').value||0,cost:i.cost,date:today()});cl();toast('✅ විකුණුම record උනා')}
 function openR(id){const r=D.reps.find(x=>x.id===id)||{bill:nextBill(),cust:'',phone:'',device:'',issue:'',charge:'',status:'Received'};
- sh(`<h3>🔧 Repair</h3><label>බිල් අංකය (බඩුවේ අලවන එක)</label><input id="r0" value="${E(r.bill)}" inputmode="numeric"><label>Customer</label><input id="r1" value="${E(r.cust)}"><label>Phone</label><input id="r2" value="${E(r.phone)}">
- <label>Device</label><input id="r3" value="${E(r.device)}"><label>ප්‍රශ්නය</label><textarea id="r4">${E(r.issue)}</textarea>
- <label>Charge</label><input id="r5" type="number" value="${r.charge}"><label>Status</label>
+ PH=r.photo||'';sh(`<h3>🔧 Repair</h3><label>බිල් අංකය (බඩුවේ අලවන එක)</label><input id="r0" value="${E(r.bill)}" inputmode="numeric"><label>Customer</label><input id="r1" value="${E(r.cust)}"><label>Phone</label><input id="r2" value="${E(r.phone)}">
+ <label>Device</label><input id="r3" value="${E(r.device)}"><label>👨‍🔧 Technician</label><input id="r10" value="${E(r.tech)}"><label>ප්‍රශ්නය</label><textarea id="r4">${E(r.issue)}</textarea>
+ <label>📷 Photo</label><input type="file" accept="image/*" onchange="pick(this)"><img id="pv" class="ph" src="${PH}" style="display:${PH?'block':'none'}"><label>Charge</label><input id="r5" type="number" value="${r.charge}"><div class="two"><div><label>Advance</label><input id="r7" type="number" value="${r.adv||''}"></div><div><label>Parts වියදම</label><input id="r8" type="number" value="${r.pcost||''}"></div></div><label>වගකීම (දින)</label><input id="r9" type="number" value="${r.war||''}"><label>Status</label>
  <select id="r6">${['Received','Repairing','Ready','Delivered'].map(s=>`<option ${s===r.status?'selected':''}>${s}</option>`).join('')}</select><br>
  <div class="two"><button onclick="saveR('${id||''}')">Save</button>${id?`<button class="r" onclick="delR('${id}')">Delete</button>`:'<button class="g" onclick="cl()">Cancel</button>'}</div>`)}
-function saveR(id){const o={id:id||uid(),bill:$('r0').value.trim(),cust:$('r1').value,phone:$('r2').value,device:$('r3').value||'Device',issue:$('r4').value,charge:+$('r5').value||0,status:$('r6').value,date:today()};
- const k=D.reps.findIndex(x=>x.id===id);if(k>=0)o.date=D.reps[k].date;if(o.bill&&D.reps.some(x=>x.bill===o.bill&&x.id!==o.id)&&!confirm('මේ බිල් අංකය කලින් තියෙනවා. ඒත් save කරන්නද?'))return;put('reps',o);cl();toast('💾 Save උනා')}
+function saveR(id){const o={id:id||uid(),bill:$('r0').value.trim(),cust:$('r1').value,phone:$('r2').value,device:$('r3').value||'Device',issue:$('r4').value,charge:+$('r5').value||0,status:$('r6').value,tech:$('r10').value.trim(),photo:PH,adv:+$('r7').value||0,pcost:+$('r8').value||0,war:+$('r9').value||0,date:today()};
+ const k=D.reps.findIndex(x=>x.id===id);o.ddate=k>=0?(D.reps[k].ddate||''):'';if(k>=0)o.date=D.reps[k].date;if(o.status==='Delivered'&&!o.ddate)o.ddate=today();if(o.status!=='Delivered')o.ddate='';if(o.bill&&D.reps.some(x=>x.bill===o.bill&&x.id!==o.id)&&!confirm('මේ බිල් අංකය කලින් තියෙනවා. ඒත් save කරන්නද?'))return;put('reps',o);cl();toast('💾 Save උනා')}
 function delR(id){if(confirm('Delete?')){rm('reps',id);cl()}}
 function calc(w){const c=+$('c1').value||0;
  if(w==='p')$('c3').value=(c*(1+(+$('c2').value||0)/100)).toFixed(2);
  else if(c)$('c2').value=(((+$('c3').value||0)-c)/c*100).toFixed(1);
  const s=+$('c3').value||0;$('c4').innerHTML=`ලාභය: <b>${R(s-c)}</b> • Markup ${c?((s-c)/c*100).toFixed(1):0}% • Margin ${s?((s-c)/s*100).toFixed(1):0}%`}
 function exp(){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(D)],{type:'application/json'}));a.download='max-electronics-backup.json';a.click()}
-function impF(el){const f=el.files[0];if(!f)return;const r=new FileReader();r.onload=async()=>{try{const X=JSON.parse(r.result);for(const c of['items','sales','reps'])for(const o of X[c]||[])await put(c,o);alert('Import සාර්ථකයි')}catch(e){alert('File එක වැරදියි')}};r.readAsText(f)}
+function impF(el){const f=el.files[0];if(!f)return;const r=new FileReader();r.onload=async()=>{try{const X=JSON.parse(r.result);for(const c of['items','sales','reps','exp','debt','sup'])for(const o of X[c]||[])await put(c,o);alert('Import සාර්ථකයි')}catch(e){alert('File එක වැරදියි')}};r.readAsText(f)}
 function theme(){const r=document.documentElement,d=r.dataset.theme==='light';r.dataset.theme=d?'dark':'light';try{localStorage.setItem('maxth',r.dataset.theme)}catch(e){}}
 try{const t=localStorage.getItem('maxth');if(t)document.documentElement.dataset.theme=t}catch(e){}
 live();
@@ -179,8 +181,8 @@ function ds(n){const d=new Date();d.setDate(d.getDate()-n);return d.getFullYear(
 const sum=(L,f)=>L.reduce((a,s)=>a+f(s),0);
 function toast(t){const d=document.createElement('div');d.className='toast';d.textContent=t;document.body.appendChild(d);setTimeout(()=>d.remove(),2300);if(navigator.vibrate)navigator.vibrate(30)}
 function cnt(id,v,m){const el=$(id);if(!el)return;const a=LAST[id]||0;LAST[id]=v;if(a===v){el.textContent=m?R(v):v;return}const t0=performance.now();(function f(n){const p=Math.min(1,(n-t0)/800),e=1-Math.pow(1-p,3),x=a+(v-a)*e;el.textContent=m?R(x):Math.round(x);if(p<1)requestAnimationFrame(f)})(t0)}
-function go(t){tab=t;document.querySelectorAll('.tab').forEach(e=>e.classList.remove('on'));const T=$('t-'+t);T.classList.add('on','fx');setTimeout(()=>T.classList.remove('fx'),900);tabs.forEach(x=>$('n-'+x[0]).classList.toggle('on',x[0]===t));$('fab').style.display=['home','sales','tools'].includes(t)?'none':'block';render();scrollTo(0,0)}
-function render(){rHome();rStock();rSales();rRep();badge()}
+function go(t){tab=t;document.querySelectorAll('.tab').forEach(e=>e.classList.remove('on'));const T=$('t-'+t);T.classList.add('on','fx');setTimeout(()=>T.classList.remove('fx'),900);tabs.forEach(x=>$('n-'+x[0]).classList.toggle('on',x[0]===t));$('fab').style.display=['sales','tools'].includes(t)?'none':'block';$('fab').textContent=t==='home'?'🛒':'＋';render();scrollTo(0,0)}
+function render(){rHome();rStock();rSales();rRep();badge();homeX();rExp();rDebt();rSup()}
 function badge(){const n=D.items.filter(low).length,b=$('n-stock');let e=b.querySelector('.bd');if(!e){e=document.createElement('em');e.className='bd';b.appendChild(e)}e.textContent=n;e.style.display=n?'block':'none'}
 function rHome(){
  const ts=D.sales.filter(s=>s.date===today()),rev=sum(ts,s=>s.price*s.qty),pr=sum(ts,s=>(s.price-s.cost)*s.qty);
@@ -218,14 +220,56 @@ function rSales(){const f=SD==='today'?s=>s.date===today():SD==='7'?s=>s.date>=d
  L.map((s,k)=>`<div class="card row" style="--i:${Math.min(k+1,9)}"><div><b>${E(s.name)} × ${s.qty}</b><br><small>${s.date}</small></div><div style="text-align:right">${R(s.price*s.qty)}<br><small style="color:var(--ok)">+${R((s.price-s.cost)*s.qty)}</small></div><button class="g" onclick="undo('${s.id}')">↩️</button></div>`).join('')||'<p class="mu" style="text-align:center;margin-top:30px">විකුණුම් නෑ</p>'}
 function undo(id){const s=D.sales.find(x=>x.id===id);if(!s||!confirm('මේ විකුණුම අයින් කරලා stock එක ආපහු දාන්නද?'))return;const i=D.items.find(x=>x.name===s.name);if(i){i.qty+=s.qty;put('items',i)}rm('sales',id);toast('↩️ අයින් කලා')}
 function rRep(){const c={Received:'wn',Repairing:'wn',Ready:'ok',Delivered:'ok'};
- $('repList').innerHTML=[...D.reps].reverse().filter(repQ).map((r,k)=>`<div class="card" style="--i:${Math.min(k,9)}"><div class="row"><b>${r.bill?'#'+E(r.bill)+' • ':''}${E(r.device)}</b><span class="pill ${c[r.status]}">${r.status}</span></div>
- <small>${E(r.cust)} ${E(r.phone)} • ${r.date}</small><p style="margin:6px 0">${E(r.issue)}</p>${r.phone?`<button class="call" onclick="callC('${r.id}')">📞 Call කරන්න • ${E(r.phone)}</button>`:''}<div class="row"><b>${R(r.charge)}</b><span>${r.status!=='Delivered'?`<button class="g" onclick="nxt('${r.id}')">➡️</button> `:''}${r.phone?`<button class="s" onclick="wa('${r.id}')">💬</button> `:''}<button class="g" onclick="openR('${r.id}')">✏️</button></span></div></div>`).join('')||'<p class="mu" style="text-align:center;margin-top:30px">Repairs නෑ. ＋ ඔබන්න</p>'}
+ $('repList').innerHTML=`<div class="chips">${['all',...ST].map(x=>chip(`RF='${x}';rRep()`,x==='all'?'සියල්ල':x,RF===x)).join('')}</div>`+[...D.reps].reverse().filter(repQ).map((r,k)=>`<div class="card" style="--i:${Math.min(k,9)}"><div class="row"><b>${r.bill?'#'+E(r.bill)+' • ':''}${E(r.device)}</b><span class="pill ${c[r.status]}">${r.status}</span></div>
+ <small>${E(r.cust)} ${E(r.phone)} • ${r.date}</small><p style="margin:6px 0">${E(r.issue)}</p>${r.phone?`<button class="call" onclick="callC('${r.id}')">📞 Call කරන්න • ${E(r.phone)}</button>`:''}<div class="row"><b>${R(r.charge)}</b><span>${r.status!=='Delivered'?`<button class="g" onclick="nxt('${r.id}')">➡️</button> `:''}${r.phone?`<button class="s" onclick="wa('${r.id}')">💬</button> `:''}<button class="g" onclick="rcpt('${r.id}')">🧾</button> <button class="g" onclick="openR('${r.id}')">✏️</button></span></div></div>`).join('')||'<p class="mu" style="text-align:center;margin-top:30px">Repairs නෑ. ＋ ඔබන්න</p>'}
 function callC(id){const r=D.reps.find(x=>x.id===id);let p=(r.phone||'').replace(/[^\d+]/g,'');if(p)location.href='tel:'+p}
 function nextBill(){const n=D.reps.map(r=>parseInt(r.bill)).filter(x=>x>0);return n.length?String(Math.max(...n)+1):''}
-function repQ(r){const q=($('rq').value||'').toLowerCase().trim();return !q||[r.bill,r.cust,r.phone,r.device].join(' ').toLowerCase().includes(q)}
-function nxt(id){const r=D.reps.find(x=>x.id===id),k=ST.indexOf(r.status);if(k<3){r.status=ST[k+1];put('reps',r);toast('➡️ '+r.status)}}
+function repQ(r){const q=($('rq').value||'').toLowerCase().trim();return (RF==='all'||r.status===RF)&&(!q||[r.bill,r.cust,r.phone,r.device,r.tech].join(' ').toLowerCase().includes(q))}
+function nxt(id){const r=D.reps.find(x=>x.id===id),k=ST.indexOf(r.status);if(k<3){r.status=ST[k+1];if(r.status==='Delivered')r.ddate=today();put('reps',r);toast('➡️ '+r.status)}}
 function wa(id){const r=D.reps.find(x=>x.id===id);let p=(r.phone||'').replace(/\D/g,'');if(p[0]==='0')p='94'+p.slice(1);
  const m='Max Electronics 🔧\n'+r.device+' - '+(r.status==='Ready'?'repair එක ඉවරයි, ගන්න පුළුවන්':'status: '+r.status)+'\nගාස්තුව: '+R(r.charge)+'\nස්තූතියි!';
  open('https://wa.me/'+p+'?text='+encodeURIComponent(m),'_blank')}
+function addD(d,n){const x=new Date(d+'T00:00:00');x.setDate(x.getDate()+n);return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0')}
+function extra(r){let h=(r.tech?'<small>👨‍🔧 '+E(r.tech)+'</small><br>':'')+(r.photo?'<img class="ph" src="'+r.photo+'" onclick="zoom(this.src)"><br>':'');if(r.adv>0&&r.status!=='Delivered')h+=`<small>💵 Advance ${R(r.adv)} • <b style="color:var(--warn)">ශේෂය ${R(r.charge-r.adv)}</b></small><br>`;
+ if(r.war>0&&r.ddate){const e=addD(r.ddate,r.war),ok=e>=today();h+=`<small style="color:var(--${ok?'ok':'bad'})">🛡️ වගකීම ${ok?'ඉවර වෙන්නේ':'ඉවර උනා'} ${e}</small><br>`}
+ const age=Math.floor((new Date(today())-new Date(r.date))/864e5);if(r.status==='Ready'&&age>=7)h+=`<small style="color:var(--warn)">⏰ දින ${age}කට කලින් ආපු එකක්, තාම ගන්න ඇවිත් නෑ</small>`;return h}
+function rcpt(id){const r=D.reps.find(x=>x.id===id),w=open('','_blank');if(!w)return toast('Pop-up block වෙලා');
+ w.document.write(`<meta name=viewport content="width=device-width"><title>Receipt</title><body style="font-family:sans-serif;max-width:360px;margin:20px auto"><h2 style="text-align:center">MAX ELECTRONICS</h2><p style="text-align:center">Repair Receipt</p><hr><p>බිල් අංකය: <b>#${E(r.bill)}</b><br>දිනය: ${r.date}<br>Customer: ${E(r.cust)} ${E(r.phone)}<br>Device: ${E(r.device)}<br>ප්‍රශ්නය: ${E(r.issue)}</p><hr><p>ගාස්තුව: ${R(r.charge)}<br>Advance: ${R(r.adv||0)}<br><b>ශේෂය: ${R(r.charge-(r.adv||0))}</b>${r.war?`<br>වගකීම: දින ${r.war}`:''}</p><hr><p style="text-align:center">ස්තූතියි! 🙏</p>`);w.document.close();setTimeout(()=>w.print(),400)}
+function rExp(){const c=$('expCard');if(!c)return;const ms=today().slice(0,7),L=(D.exp||[]).filter(e=>e.date.startsWith(ms)).reverse();
+ c.innerHTML=`<div class="row"><b>💸 වියදම් (මේ මාසේ ${R(sum(L,e=>e.amt))})</b><button onclick="openE()">＋</button></div>`+L.map(e=>`<div class="row" style="margin-top:8px"><span>${E(e.title)}<br><small>${e.date}</small></span><span>${R(e.amt)} <button class="g" onclick="delE('${e.id}')">🗑️</button></span></div>`).join('')}
+function openE(){sh(`<h3>💸 වියදමක්</h3><label>මොකටද (කුලිය, current බිල, කෑම...)</label><input id="e1"><label>ගාන</label><input id="e2" type="number"><br><button style="width:100%" onclick="saveE()">Save</button>`)}
+function saveE(){const t=$('e1').value.trim(),a=+$('e2').value;if(!t||!a)return alert('නමයි ගානයි ඕනේ');put('exp',{id:uid(),title:t,amt:a,date:today()});cl();toast('💸 Save උනා')}
+function delE(id){if(confirm('මකන්නද?'))rm('exp',id)}
+function homeX(){const ms=today().slice(0,7),mp=sum(D.sales.filter(s=>s.date.startsWith(ms)),s=>(s.price-s.cost)*s.qty),
+ dl=D.reps.filter(r=>r.status==='Delivered'&&(r.ddate||'').startsWith(ms)),rp=sum(dl,r=>r.charge-(r.pcost||0)),ex=sum((D.exp||[]).filter(e=>e.date.startsWith(ms)),e=>e.amt),net=mp+rp-ex;
+ const rd=D.reps.filter(r=>r.status==='Ready').length,due=sum(D.reps.filter(r=>r.status!=='Delivered'),r=>r.charge-(r.adv||0));
+ $('t-home').insertAdjacentHTML('beforeend',`<div class="card"><b>📒 මාසික වාර්තාව</b>
+ <div class="row" style="margin-top:8px"><span>Parts ලාභය</span><span>${R(mp)}</span></div>
+ <div class="row"><span>Repair ලාභය (${dl.length})</span><span>${R(rp)}</span></div>
+ <div class="row"><span>වියදම්</span><span style="color:var(--bad)">− ${R(ex)}</span></div><hr style="border:0;border-top:1px solid #ffffff18;margin:8px 0">
+ <div class="row"><b>ශුද්ධ ලාභය</b><b style="color:var(--${net>=0?'ok':'bad'})">${R(net)}</b></div></div>
+ <div class="card"><div class="row"><span>🔧 ගන්න ඉන්න (Ready)</span><b>${rd}</b></div><div class="row" style="margin-top:6px"><span>💵 Repair වලින් එන්න තියෙන</span><b>${R(due)}</b></div></div>
+ <div class="two"><button class="g" onclick="shareLow()">📤 Stock අඩු ලැයිස්තුව</button><button class="g" onclick="shareDay()">📤 අද වාර්තාව</button></div>`)}
+function shareLow(){const L=D.items.filter(low);if(!L.length)return toast('Stock අඩු දෙයක් නෑ ✅');open('https://wa.me/?text='+encodeURIComponent('📦 Max Electronics - ගන්න ඕනේ ඒවා:\n'+L.map(i=>'• '+i.name+' ('+i.qty+' ඉතිරියි)').join('\n')),'_blank')}
+function shareDay(){const ts=D.sales.filter(s=>s.date===today()),dl=D.reps.filter(r=>r.ddate===today()),ex=sum((D.exp||[]).filter(e=>e.date===today()),e=>e.amt);
+ const m='📊 Max Electronics - '+today()+'\nPart විකුණුම්: '+R(sum(ts,s=>s.price*s.qty))+'\nPart ලාභය: '+R(sum(ts,s=>(s.price-s.cost)*s.qty))+'\nRepairs delivered: '+dl.length+' ('+R(sum(dl,r=>r.charge))+')\nවියදම්: '+R(ex);open('https://wa.me/?text='+encodeURIComponent(m),'_blank')}
+let RF='all',PH='';
+function pick(el){const f=el.files[0];if(!f)return;const im=new Image();im.onload=()=>{const c=document.createElement('canvas'),k=Math.min(1,480/Math.max(im.width,im.height));c.width=im.width*k;c.height=im.height*k;c.getContext('2d').drawImage(im,0,0,c.width,c.height);PH=c.toDataURL('image/jpeg',.6);const p=$('pv');p.src=PH;p.style.display='block'};im.src=URL.createObjectURL(f)}
+function zoom(src){sh(`<img src="${src}" style="width:100%;border-radius:14px">`)}
+function quick(){sh(`<h3>🛒 Quick Sell</h3><input id="qq" placeholder="🔍 item නම..." oninput="lq()"><div id="ql"></div>`);lq()}
+function lq(){const q=($('qq').value||'').toLowerCase();$('ql').innerHTML=D.items.filter(i=>i.qty>0&&(i.name+i.cat).toLowerCase().includes(q)).slice(0,20).map(i=>`<div class="card row" onclick="sell('${i.id}')"><span><b>${E(i.name)}</b><br><small>${i.qty} units</small></span><b>${R(i.sale)}</b></div>`).join('')||'<p class="mu">නෑ</p>'}
+function rDebt(){const c=$('debtCard');if(!c)return;const L=(D.debt||[]).filter(d=>!d.paid);
+ c.innerHTML=`<div class="row"><b>📕 ණය (${R(sum(L,d=>d.amt))})</b><button onclick="openD()">＋</button></div>`+L.map(d=>`<div class="row" style="margin-top:8px"><span>${E(d.name)}<br><small>${E(d.note)} • ${d.date}</small></span><span>${R(d.amt)}<br>${d.phone?`<button class="g" onclick="location.href='tel:${E(d.phone)}'">📞</button> `:''}<button class="s" onclick="payD('${d.id}')">✔️</button></span></div>`).join('')}
+function openD(){sh(`<h3>📕 ණයක්</h3><label>නම</label><input id="d1"><label>Phone</label><input id="d2" type="tel"><label>ගාන</label><input id="d3" type="number"><label>මොකටද</label><input id="d4"><br><button style="width:100%" onclick="saveD()">Save</button>`)}
+function saveD(){const n=$('d1').value.trim(),a=+$('d3').value;if(!n||!a)return alert('නමයි ගානයි ඕනේ');put('debt',{id:uid(),name:n,phone:$('d2').value.trim(),amt:a,note:$('d4').value.trim(),date:today(),paid:false});cl();toast('📕 Save උනා')}
+function payD(id){const d=D.debt.find(x=>x.id===id);if(confirm(E(d.name)+' ගෙවුවාද?')){d.paid=true;put('debt',d);toast('✔️ ගෙවුවා')}}
+function rSup(){const c=$('supCard');if(!c)return;c.innerHTML=`<div class="row"><b>🚚 Suppliers</b><button onclick="openS()">＋</button></div>`+(D.sup||[]).map(s=>`<div class="row" style="margin-top:8px"><span>${E(s.name)}<br><small>${E(s.note)}</small></span><span>${s.phone?`<button class="s" onclick="location.href='tel:${E(s.phone)}'">📞</button> `:''}<button class="g" onclick="delS('${s.id}')">🗑️</button></span></div>`).join('')}
+function openS(){sh(`<h3>🚚 Supplier</h3><label>නම / සමාගම</label><input id="s5"><label>Phone</label><input id="s6" type="tel"><label>සටහන (මොනාද සපයන්නේ)</label><input id="s7"><br><button style="width:100%" onclick="saveS()">Save</button>`)}
+function saveS(){const n=$('s5').value.trim();if(!n)return alert('නම ඕනේ');put('sup',{id:uid(),name:n,phone:$('s6').value.trim(),note:$('s7').value.trim()});cl();toast('🚚 Save උනා')}
+function delS(id){if(confirm('මකන්නද?'))rm('sup',id)}
+function custs(){const m={};D.reps.forEach(r=>{const k=r.phone||r.cust;if(!k)return;const c=m[k]||(m[k]={n:r.cust,p:r.phone,c:0,t:0,l:''});c.c++;c.t+=r.charge;c.l=r.device});return Object.values(m)}
+function openC(){sh(`<h3>👥 Customers</h3><input id="cq" placeholder="🔍 නම / phone" oninput="lc()"><div id="cl"></div>`);lc()}
+function lc(){const q=($('cq').value||'').toLowerCase();$('cl').innerHTML=custs().filter(c=>(c.n+c.p).toLowerCase().includes(q)).map(c=>`<div class="card row"><span><b>${E(c.n)}</b><br><small>${E(c.p)} • Repairs ${c.c} • ${R(c.t)}<br>අන්තිම: ${E(c.l)}</small></span>${c.p?`<button class="call" style="width:auto;margin:0;padding:12px" onclick="location.href='tel:${E(c.p)}'">📞</button>`:''}</div>`).join('')||'<p class="mu">නෑ</p>'}
+function csv(){const rows=[['Date','Item','Qty','Price','Cost','Profit']].concat(D.sales.map(s=>[s.date,s.name,s.qty,s.price,s.cost,(s.price-s.cost)*s.qty]));const t=rows.map(r=>r.map(x=>'"'+String(x).replace(/"/g,'""')+'"').join(',')).join('\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+t],{type:'text/csv'}));a.download='sales.csv';a.click()}
 go('home');
 </script></body></html>
