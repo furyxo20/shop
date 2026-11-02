@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="si"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b1020">
+<title>Max Electronics</title>
+<link rel="manifest" href="data:application/json,{&quot;name&quot;:&quot;Max Electronics&quot;,&quot;short_name&quot;:&quot;Max&quot;,&quot;display&quot;:&quot;standalone&quot;,&quot;start_url&quot;:&quot;.&quot;,&quot;background_color&quot;:&quot;%230b1020&quot;,&quot;theme_color&quot;:&quot;%230b1020&quot;}">
+<style>
+:root{--bg:#0b1020;--card:#151c33;--card2:#1d2644;--tx:#eef1fb;--mu:#8f9bc0;--ac:#4f8cff;--ac2:#8b5cf6;--ok:#22c55e;--bad:#ef4444;--warn:#f59e0b;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px)}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]){--bg:#eef2fb;--card:#fff;--card2:#e6ebf8;--tx:#141a2e;--mu:#5d6788}}
+:root[data-theme="light"]{--bg:#eef2fb;--card:#fff;--card2:#e6ebf8;--tx:#141a2e;--mu:#5d6788}
+*{box-sizing:border-box;margin:0;font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{background:var(--bg);color:var(--tx);padding:0 14px calc(90px + env(safe-area-inset-bottom,0px));min-height:100vh}
+header{display:flex;align-items:center;gap:10px;padding:16px 0 8px}
+.logo{width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,var(--ac),var(--ac2));display:grid;place-items:center;font-size:22px;animation:pulse 3s infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 8px #4f8cff22}}
+h1{font-size:19px}small,.mu{color:var(--mu);font-size:12px}
+.tab{display:none;animation:in .35s ease}.tab.on{display:block}
+@keyframes in{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0}
+.st{background:var(--card);border-radius:16px;padding:14px;border:1px solid #ffffff10}
+.st b{display:block;font-size:20px;margin-top:4px}
+.card{background:var(--card);border-radius:16px;padding:12px;margin:8px 0;border:1px solid #ffffff10;animation:in .3s ease}
+.row{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.pill{padding:3px 10px;border-radius:99px;font-size:12px;font-weight:600}
+.ok{background:#22c55e26;color:var(--ok)}.bad{background:#ef444426;color:var(--bad)}.wn{background:#f59e0b26;color:var(--warn)}
+input,select,textarea{width:100%;padding:11px;border-radius:12px;border:1px solid #ffffff1c;background:var(--card2);color:var(--tx);font-size:15px;margin:4px 0}
+label{font-size:12px;color:var(--mu)}
+button{border:0;border-radius:12px;padding:10px 14px;font-weight:600;color:#fff;background:linear-gradient(135deg,var(--ac),var(--ac2));font-size:14px;transition:transform .15s}
+button:active{transform:scale(.94)}button.g{background:var(--card2);color:var(--tx)}button.r{background:var(--bad)}button.s{background:var(--ok)}
+nav{position:fixed;left:0;right:0;bottom:0;display:flex;background:var(--card);border-top:1px solid #ffffff12;padding:6px 6px calc(6px + env(safe-area-inset-bottom,0px));z-index:5}
+nav button{flex:1;background:none;color:var(--mu);font-size:11px;padding:6px 2px}nav button span{display:block;font-size:20px}nav button.on{color:var(--ac)}
+.fab{position:fixed;right:18px;bottom:calc(84px + env(safe-area-inset-bottom,0px));width:56px;height:56px;border-radius:50%;font-size:28px;z-index:6;box-shadow:0 8px 20px #4f8cff55}
+.modal{position:fixed;inset:0;background:#000a;display:none;align-items:flex-end;z-index:10}.modal.on{display:flex}
+.sheet{background:var(--bg);width:100%;max-height:92vh;overflow:auto;border-radius:22px 22px 0 0;padding:18px;animation:up .3s ease}
+@keyframes up{from{transform:translateY(60px);opacity:0}}
+.bar{height:6px;border-radius:9px;background:var(--card2);margin-top:6px;overflow:hidden}.bar i{display:block;height:100%;transition:width .6s}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+body::before{content:"";position:fixed;inset:-20%;z-index:-1;background:radial-gradient(circle at 20% 15%,#4f8cff30,transparent 40%),radial-gradient(circle at 85% 75%,#8b5cf630,transparent 40%);animation:drift 14s ease-in-out infinite alternate}
+@keyframes drift{to{transform:translate(5%,4%) scale(1.15)}}
+@keyframes grow{from{transform:scaleY(0)}}@keyframes toast{0%{opacity:0;transform:translate(-50%,20px)}12%,85%{opacity:1;transform:translate(-50%,0)}100%{opacity:0}}
+.card,.st{animation:none}.fx .card,.fx .st{animation:in .5s both;animation-delay:calc(var(--i,0)*55ms)}
+.st{position:relative;overflow:hidden}.st::after{content:"";position:absolute;right:-18px;top:-18px;width:72px;height:72px;border-radius:50%;background:radial-gradient(#4f8cff44,transparent 70%)}
+.st b{font-size:18px}.card:active,.st:active{transform:scale(.985)}.card,.st{transition:transform .2s}
+.bars{display:flex;align-items:flex-end;gap:8px;height:120px;margin-top:10px}.bars>div{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:3px}
+.bars i{width:100%;border-radius:8px 8px 3px 3px;background:linear-gradient(180deg,var(--ac),var(--ac2));transform-origin:bottom}.fx .bars i{animation:grow .8s .2s both}
+.chips{display:flex;gap:6px;overflow-x:auto;padding:4px 0 6px}.chip{white-space:nowrap;background:var(--card2);color:var(--mu);padding:7px 13px;border-radius:99px;font-size:13px}.chip.on{background:linear-gradient(135deg,var(--ac),var(--ac2));color:#fff}
+.three{display:grid;grid-template-columns:2fr 1fr 1fr;gap:8px}nav button{position:relative}
+.bd{position:absolute;top:0;right:22%;background:var(--bad);color:#fff;font-size:10px;border-radius:99px;padding:1px 6px;font-style:normal;animation:pulse 2s infinite}
+.toast{position:fixed;left:50%;bottom:calc(100px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--card2);color:var(--tx);padding:10px 18px;border-radius:99px;z-index:99;box-shadow:0 8px 24px #0006;animation:toast 2.3s both}
+</style></head><body>
+<header><div class="logo">⚡</div><div><h1>MAX ELECTRONICS</h1><small>Repair &amp; Stock Manager</small></div><small id="sy" style="margin-left:auto">📴 Local</small></header>
+
+<div id="lg" style="position:fixed;inset:0;background:var(--bg);z-index:50;display:flex;align-items:center;justify-content:center;padding:24px"><div style="width:100%;max-width:360px;text-align:center"><div class="logo" style="margin:0 auto 12px;width:64px;height:64px;font-size:32px">⚡</div><h1>MAX ELECTRONICS</h1><p class="mu" style="margin:6px 0 16px">Login වෙන්න</p><input id="lu" type="email" placeholder="Email"><input id="lp" type="password" placeholder="Password" onkeydown="if(event.key==='Enter')login()"><button style="width:100%;margin-top:8px" onclick="login()">Login</button><p id="le" style="color:var(--bad);margin-top:8px;font-size:13px"></p></div></div>
+<section id="t-home" class="tab on"></section>
+<section id="t-stock" class="tab"><input id="q" placeholder="🔍 සොයන්න..." oninput="rStock()"><div id="stockList"></div></section>
+<section id="t-sales" class="tab"><div id="salesList"></div></section>
+<section id="t-rep" class="tab"><div id="repList"></div></section>
+<section id="t-tools" class="tab">
+ <div class="card"><b>💹 Price Calculator</b>
+  <label>මිලට ගත් ගාන (Cost)</label><input id="c1" type="number" oninput="calc('c')">
+  <label>ලාභ ප්‍රතිශතය %</label><input id="c2" type="number" oninput="calc('p')">
+  <label>විකුණන ගාන (Sale)</label><input id="c3" type="number" oninput="calc('s')">
+  <p id="c4" class="mu"></p></div>
+ <div class="card"><b>💾 Backup</b><p class="mu">Data ඔබේ ෆෝන් එකේම save වෙනවා. Backup එකක් තියාගන්න.</p><br>
+  <div class="two"><button onclick="exp()">Export</button><button class="g" onclick="imp.click()">Import</button></div>
+  <input type="file" id="imp" hidden accept=".json" onchange="impF(this)"><button class="g" style="width:100%;margin-top:8px" onclick="logout()">🚪 Logout</button></div>
+ <div class="card"><button class="g" onclick="theme()">🌓 Theme මාරු කරන්න</button></div>
+</section>
+<button class="fab" id="fab" onclick="openF()">＋</button>
+<nav id="nav"></nav>
+<div class="modal" id="m" onclick="if(event.target===this)cl()"><div class="sheet" id="sh"></div></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script>
+const $=id=>document.getElementById(id);
+const E=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const R=n=>'Rs. '+(+n||0).toLocaleString('en-LK',{maximumFractionDigits:2});
+let D={items:[],sales:[],reps:[]},tab='home';
+try{D=JSON.parse(localStorage.getItem('maxel'))||D}catch(e){}
+function save(){try{localStorage.setItem('maxel',JSON.stringify(D))}catch(e){}}
+firebase.initializeApp({apiKey:"AIzaSyBs6jnnyimclQYjwyb3VWu3Jaf4ztsgMIY",authDomain:"max-electronics-5e86b.firebaseapp.com",projectId:"max-electronics-5e86b",storageBucket:"max-electronics-5e86b.firebasestorage.app",messagingSenderId:"622567667482",appId:"1:622567667482:web:86bf998ec6c87ab8e49ea3"});
+const fs=firebase.firestore(),au=firebase.auth();
+try{fs.enablePersistence({synchronizeTabs:true}).catch(()=>{})}catch(e){}
+let db=null,subs=[];
+async function put(c,o){try{await fs.collection(c).doc(o.id).set(o)}catch(e){alert('Save වුනේ නෑ: '+(e.code||e.message))}}
+async function rm(c,id){try{await fs.collection(c).doc(id).delete()}catch(e){alert('Delete වුනේ නෑ')}}
+function live(){au.onAuthStateChanged(u=>{subs.forEach(f=>f());subs=[];
+ if(!u){db=null;$('lg').style.display='flex';$('sy').textContent='🔒';return}
+ db=1;$('lg').style.display='none';$('sy').textContent='🟢 Live sync';
+ ['items','sales','reps'].forEach(n=>subs.push(fs.collection(n).onSnapshot(s=>{D[n]=s.docs.map(x=>x.data());render()},e=>{$('sy').textContent='🔴 Sync error'})))})}
+async function login(){$('le').textContent='';try{await au.signInWithEmailAndPassword($('lu').value.trim(),$('lp').value)}catch(e){$('le').textContent='Email/Password වැරදියි ('+(e.code||'')+')'}}
+function logout(){au.signOut()}
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,5);
+const today=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+const tabs=[['home','🏠','Home'],['stock','📦','Stock'],['sales','🧾','Sales'],['rep','🔧','Repairs'],['tools','🧮','Tools']];
+$('nav').innerHTML=tabs.map(t=>`<button id="n-${t[0]}" onclick="go('${t[0]}')"><span>${t[1]}</span>${t[2]}</button>`).join('');
+function go(t){tab=t;document.querySelectorAll('.tab').forEach(e=>e.classList.remove('on'));$('t-'+t).classList.add('on');
+ tabs.forEach(x=>$('n-'+x[0]).classList.toggle('on',x[0]===t));$('fab').style.display=['home','sales','tools'].includes(t)?'none':'block';render();scrollTo(0,0)}
+function render(){rHome();rStock();rSales();rRep()}
+const low=i=>i.qty<=i.min;
+function rHome(){
+ const ts=D.sales.filter(s=>s.date===today());
+ const rev=ts.reduce((a,s)=>a+s.price*s.qty,0),pr=ts.reduce((a,s)=>a+(s.price-s.cost)*s.qty,0);
+ const val=D.items.reduce((a,i)=>a+i.cost*i.qty,0),lw=D.items.filter(low);
+ const open=D.reps.filter(r=>r.status!=='Delivered').length;
+ $('t-home').innerHTML=`<div class="grid">
+ <div class="st">💰 අද විකුණුම්<b>${R(rev)}</b></div>
+ <div class="st">📈 අද ලාභය<b style="color:var(--ok)">${R(pr)}</b></div>
+ <div class="st">📦 Stock අගය<b>${R(val)}</b></div>
+ <div class="st">🔧 Open Repairs<b>${open}</b></div></div>
+ <div class="card"><b>⚠️ Stock අඩු දේවල් (${lw.length})</b>${lw.map(i=>`<div class="row" style="margin-top:8px"><span>${E(i.name)}</span><span class="pill bad">${i.qty} ඉතිරියි</span></div>`).join('')||'<p class="mu">සියල්ල හොඳයි ✅</p>'}</div>
+ <div class="card"><b>🛒 අද විකිණුණු parts (${ts.length})</b>${ts.map(s=>`<div class="row" style="margin-top:8px"><span>${E(s.name)} × ${s.qty}</span><span>${R(s.price*s.qty)}</span></div>`).join('')||'<p class="mu">තවම විකුණුම් නෑ</p>'}</div>`}
+function rStock(){
+ const q=($('q').value||'').toLowerCase();
+ const L=D.items.filter(i=>(i.name+i.cat).toLowerCase().includes(q));
+ $('stockList').innerHTML=L.map(i=>{const p=i.cost?((i.sale-i.cost)/i.cost*100):0,w=Math.min(100,i.qty/Math.max(i.min*3,1)*100);
+ return`<div class="card"><div class="row"><div><b>${E(i.name)}</b><br><small>${E(i.cat)} • Retail ${R(i.retail)}</small></div><span class="pill ${low(i)?'bad':'ok'}">${i.qty} units</span></div>
+ <div class="bar"><i style="width:${w}%;background:var(--${low(i)?'bad':'ok'})"></i></div>
+ <div class="row" style="margin:8px 0"><small>ගත්ත ${R(i.cost)}</small><small>විකුණන ${R(i.sale)}</small><b style="color:${p>=0?'var(--ok)':'var(--bad)'}">${p.toFixed(1)}%</b></div>
+ <div class="two"><button class="s" onclick="sell('${i.id}')">🛒 විකුණන්න</button><button class="g" onclick="openF('${i.id}')">✏️ Edit</button></div></div>`}).join('')||'<p class="mu" style="text-align:center;margin-top:30px">Items නෑ. ＋ ඔබන්න</p>'}
+function rSales(){
+ const S=[...D.sales].reverse();
+ $('salesList').innerHTML=S.map(s=>`<div class="card row"><div><b>${E(s.name)} × ${s.qty}</b><br><small>${s.date}</small></div><div style="text-align:right">${R(s.price*s.qty)}<br><small style="color:var(--ok)">+${R((s.price-s.cost)*s.qty)}</small></div></div>`).join('')||'<p class="mu" style="text-align:center;margin-top:30px">විකුණුම් නෑ</p>'}
+function rRep(){
+ const c={Received:'wn',Repairing:'wn',Ready:'ok',Delivered:'ok'};
+ $('repList').innerHTML=[...D.reps].reverse().map(r=>`<div class="card"><div class="row"><b>${E(r.device)}</b><span class="pill ${c[r.status]}">${r.status}</span></div>
+ <small>${E(r.cust)} ${E(r.phone)} • ${r.date}</small><p style="margin:6px 0">${E(r.issue)}</p><div class="row"><b>${R(r.charge)}</b><button class="g" onclick="openR('${r.id}')">Edit</button></div></div>`).join('')||'<p class="mu" style="text-align:center;margin-top:30px">Repairs නෑ. ＋ ඔබන්න</p>'}
+function cl(){$('m').classList.remove('on')}
+function sh(h){$('sh').innerHTML=h;$('m').classList.add('on')}
+function openF(id){if(tab==='rep')return openR();
+ const i=D.items.find(x=>x.id===id)||{name:'',cat:'',cost:'',retail:'',sale:'',qty:'',min:5};
+ sh(`<h3>${id?'Edit':'අලුත් Item'}</h3>
+ <label>නම</label><input id="f1" value="${E(i.name)}">
+ <label>වර්ගය (Category)</label><input id="f2" value="${E(i.cat)}" placeholder="Capacitor, IC, Display...">
+ <div class="two"><div><label>ගත්ත මිල</label><input id="f3" type="number" value="${i.cost}" oninput="fc('c')"></div>
+ <div><label>Retail මිල</label><input id="f4" type="number" value="${i.retail}"></div>
+ <div><label>ලාභ %</label><input id="f5" type="number" oninput="fc('p')"></div>
+ <div><label>විකුණන මිල</label><input id="f6" type="number" value="${i.sale}" oninput="fc('s')"></div>
+ <div><label>Stock ගණන</label><input id="f7" type="number" value="${i.qty}"></div>
+ <div><label>අඩු අවවාදය (min)</label><input id="f8" type="number" value="${i.min}"></div></div><br>
+ <div class="two"><button onclick="saveI('${id||''}')">Save</button>${id?`<button class="r" onclick="delI('${id}')">Delete</button>`:'<button class="g" onclick="cl()">Cancel</button>'}</div>`);fc('s')}
+function fc(w){const c=+$('f3').value||0;
+ if(w==='p')$('f6').value=(c*(1+(+$('f5').value||0)/100)).toFixed(2);
+ else if(c)$('f5').value=(((+$('f6').value||0)-c)/c*100).toFixed(1)}
+function saveI(id){const n=$('f1').value.trim();if(!n)return alert('නම ඕනේ');
+ const o={id:id||uid(),name:n,cat:$('f2').value,cost:+$('f3').value||0,retail:+$('f4').value||0,sale:+$('f6').value||0,qty:+$('f7').value||0,min:+$('f8').value||0};
+ put('items',o);cl();toast('💾 Save උනා')}
+function delI(id){if(confirm('Delete කරන්නද?')){rm('items',id);cl()}}
+function sell(id){const i=D.items.find(x=>x.id===id);if(!i.qty)return alert('Stock නෑ!');
+ sh(`<h3>🛒 ${E(i.name)}</h3><p class="mu">තියෙන stock: ${i.qty}</p><label>ගණන</label><input id="s1" type="number" value="1" min="1" max="${i.qty}">
+ <label>විකුණන මිල (එකකට)</label><input id="s2" type="number" value="${i.sale}"><br><button class="s" style="width:100%" onclick="doSell('${id}')">තහවුරු කරන්න</button>`)}
+function doSell(id){const i=D.items.find(x=>x.id===id),q=Math.min(+$('s1').value||1,i.qty);
+ i.qty-=q;put('items',i);put('sales',{id:uid(),name:i.name,qty:q,price:+$('s2').value||0,cost:i.cost,date:today()});cl();toast('✅ විකුණුම record උනා')}
+function openR(id){const r=D.reps.find(x=>x.id===id)||{cust:'',phone:'',device:'',issue:'',charge:'',status:'Received'};
+ sh(`<h3>🔧 Repair</h3><label>Customer</label><input id="r1" value="${E(r.cust)}"><label>Phone</label><input id="r2" value="${E(r.phone)}">
+ <label>Device</label><input id="r3" value="${E(r.device)}"><label>ප්‍රශ්නය</label><textarea id="r4">${E(r.issue)}</textarea>
+ <label>Charge</label><input id="r5" type="number" value="${r.charge}"><label>Status</label>
+ <select id="r6">${['Received','Repairing','Ready','Delivered'].map(s=>`<option ${s===r.status?'selected':''}>${s}</option>`).join('')}</select><br>
+ <div class="two"><button onclick="saveR('${id||''}')">Save</button>${id?`<button class="r" onclick="delR('${id}')">Delete</button>`:'<button class="g" onclick="cl()">Cancel</button>'}</div>`)}
+function saveR(id){const o={id:id||uid(),cust:$('r1').value,phone:$('r2').value,device:$('r3').value||'Device',issue:$('r4').value,charge:+$('r5').value||0,status:$('r6').value,date:today()};
+ const k=D.reps.findIndex(x=>x.id===id);if(k>=0)o.date=D.reps[k].date;put('reps',o);cl();toast('💾 Save උනා')}
+function delR(id){if(confirm('Delete?')){rm('reps',id);cl()}}
+function calc(w){const c=+$('c1').value||0;
+ if(w==='p')$('c3').value=(c*(1+(+$('c2').value||0)/100)).toFixed(2);
+ else if(c)$('c2').value=(((+$('c3').value||0)-c)/c*100).toFixed(1);
+ const s=+$('c3').value||0;$('c4').innerHTML=`ලාභය: <b>${R(s-c)}</b> • Markup ${c?((s-c)/c*100).toFixed(1):0}% • Margin ${s?((s-c)/s*100).toFixed(1):0}%`}
+function exp(){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(D)],{type:'application/json'}));a.download='max-electronics-backup.json';a.click()}
+function impF(el){const f=el.files[0];if(!f)return;const r=new FileReader();r.onload=async()=>{try{const X=JSON.parse(r.result);for(const c of['items','sales','reps'])for(const o of X[c]||[])await put(c,o);alert('Import සාර්ථකයි')}catch(e){alert('File එක වැරදියි')}};r.readAsText(f)}
+function theme(){const r=document.documentElement,d=r.dataset.theme==='light';r.dataset.theme=d?'dark':'light';try{localStorage.setItem('maxth',r.dataset.theme)}catch(e){}}
+try{const t=localStorage.getItem('maxth');if(t)document.documentElement.dataset.theme=t}catch(e){}
+live();
+const LAST={};let SF='all',CF='',CATS=[],SD='today';
+const ST=['Received','Repairing','Ready','Delivered'];
+function ds(n){const d=new Date();d.setDate(d.getDate()-n);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+const sum=(L,f)=>L.reduce((a,s)=>a+f(s),0);
+function toast(t){const d=document.createElement('div');d.className='toast';d.textContent=t;document.body.appendChild(d);setTimeout(()=>d.remove(),2300);if(navigator.vibrate)navigator.vibrate(30)}
+function cnt(id,v,m){const el=$(id);if(!el)return;const a=LAST[id]||0;LAST[id]=v;if(a===v){el.textContent=m?R(v):v;return}const t0=performance.now();(function f(n){const p=Math.min(1,(n-t0)/800),e=1-Math.pow(1-p,3),x=a+(v-a)*e;el.textContent=m?R(x):Math.round(x);if(p<1)requestAnimationFrame(f)})(t0)}
+function go(t){tab=t;document.querySelectorAll('.tab').forEach(e=>e.classList.remove('on'));const T=$('t-'+t);T.classList.add('on','fx');setTimeout(()=>T.classList.remove('fx'),900);tabs.forEach(x=>$('n-'+x[0]).classList.toggle('on',x[0]===t));$('fab').style.display=['home','sales','tools'].includes(t)?'none':'block';render();scrollTo(0,0)}
+function render(){rHome();rStock();rSales();rRep();badge()}
+function badge(){const n=D.items.filter(low).length,b=$('n-stock');let e=b.querySelector('.bd');if(!e){e=document.createElement('em');e.className='bd';b.appendChild(e)}e.textContent=n;e.style.display=n?'block':'none'}
+function rHome(){
+ const ts=D.sales.filter(s=>s.date===today()),rev=sum(ts,s=>s.price*s.qty),pr=sum(ts,s=>(s.price-s.cost)*s.qty);
+ const ms=today().slice(0,7),mpr=sum(D.sales.filter(s=>s.date.startsWith(ms)),s=>(s.price-s.cost)*s.qty);
+ const val=sum(D.items,i=>i.cost*i.qty),lw=D.items.filter(low),open=D.reps.filter(r=>r.status!=='Delivered').length;
+ const days=[6,5,4,3,2,1,0].map(n=>{const d=ds(n);return{l:d.slice(8),v:sum(D.sales.filter(s=>s.date===d),s=>s.price*s.qty)}}),mx=Math.max(1,...days.map(x=>x.v));
+ const top={};D.sales.filter(s=>s.date>=ds(29)).forEach(s=>top[s.name]=(top[s.name]||0)+s.qty);
+ const tp=Object.entries(top).sort((a,b)=>b[1]-a[1]).slice(0,5);
+ const h=new Date().getHours(),g=h<12?'සුභ උදෑසනක් ☀️':h<17?'සුභ දහවලක් 🌤️':'සුභ සන්ධ්‍යාවක් 🌙';
+ $('t-home').innerHTML=`<p class="mu" style="margin:6px 0 0;font-size:14px">${g}</p>
+ <div class="grid"><div class="st" style="--i:0">💰 අද විකුණුම්<b id="k1"></b></div>
+ <div class="st" style="--i:1">📈 අද ලාභය<b id="k2" style="color:var(--ok)"></b></div>
+ <div class="st" style="--i:2">🗓️ මාසික ලාභය<b id="k3" style="color:var(--ok)"></b></div>
+ <div class="st" style="--i:3">📦 Stock අගය<b id="k4"></b></div></div>
+ <div class="card" style="--i:4"><div class="row"><b>📊 දින 7 විකුණුම්</b><small>🔧 Open repairs: ${open}</small></div>
+ <div class="bars">${days.map(x=>`<div><small>${x.v?Math.round(x.v/1000*10)/10+'k':''}</small><i style="height:${Math.max(4,x.v/mx*80)}px"></i><small>${x.l}</small></div>`).join('')}</div></div>
+ <div class="card" style="--i:5"><b>🏆 වැඩිපුරම විකිණුණු (දින 30)</b>${tp.map((x,k)=>`<div class="row" style="margin-top:8px"><span>${['🥇','🥈','🥉','4️⃣','5️⃣'][k]} ${E(x[0])}</span><span class="pill ok">${x[1]}</span></div>`).join('')||'<p class="mu">තවම නෑ</p>'}</div>
+ <div class="card" style="--i:6"><b>⚠️ Stock අඩු (${lw.length})</b>${lw.map(i=>`<div class="row" style="margin-top:8px"><span>${E(i.name)}</span><span class="pill bad">${i.qty} ඉතිරියි</span></div>`).join('')||'<p class="mu">සියල්ල හොඳයි ✅</p>'}</div>
+ <div class="card" style="--i:7"><b>🛒 අද විකිණුණු parts (${ts.length})</b>${ts.map(s=>`<div class="row" style="margin-top:8px"><span>${E(s.name)} × ${s.qty}</span><span>${R(s.price*s.qty)}</span></div>`).join('')||'<p class="mu">තවම විකුණුම් නෑ</p>'}</div>`;
+ cnt('k1',rev,1);cnt('k2',pr,1);cnt('k3',mpr,1);cnt('k4',val,1)}
+const chip=(a,t,on)=>`<button class="chip ${on?'on':''}" onclick="${a}">${t}</button>`;
+function rStock(){const q=($('q').value||'').toLowerCase();CATS=[...new Set(D.items.map(i=>i.cat).filter(Boolean))];
+ const L=D.items.filter(i=>(i.name+i.cat).toLowerCase().includes(q)&&(SF==='all'||(SF==='low')===low(i))&&(!CF||i.cat===CF));
+ $('stockList').innerHTML=`<div class="chips">${chip("SF='all';rStock()",'සියල්ල',SF==='all')}${chip("SF='low';rStock()",'⚠️ අඩු',SF==='low')}${chip("SF='ok';rStock()",'✅ හොඳ',SF==='ok')}${CATS.map((c,k)=>chip(`CF=CF===CATS[${k}]?'':CATS[${k}];rStock()`,E(c),CF===c)).join('')}</div>`+
+ L.map((i,k)=>{const p=i.cost?((i.sale-i.cost)/i.cost*100):0,w=Math.min(100,i.qty/Math.max(i.min*3,1)*100);
+ return`<div class="card" style="--i:${Math.min(k,9)}"><div class="row"><div><b>${E(i.name)}</b><br><small>${E(i.cat)} • Retail ${R(i.retail)}</small></div><span class="pill ${low(i)?'bad':'ok'}">${i.qty} units</span></div>
+ <div class="bar"><i style="width:${w}%;background:var(--${low(i)?'bad':'ok'})"></i></div>
+ <div class="row" style="margin:8px 0"><small>ගත්ත ${R(i.cost)}</small><small>විකුණන ${R(i.sale)}</small><b style="color:${p>=0?'var(--ok)':'var(--bad)'}">${p.toFixed(1)}%</b></div>
+ <div class="three"><button class="s" onclick="sell('${i.id}')">🛒 විකුණන්න</button><button class="g" onclick="restock('${i.id}')">＋ Stock</button><button class="g" onclick="openF('${i.id}')">✏️</button></div></div>`}).join('')||'<p class="mu" style="text-align:center;margin-top:30px">Items නෑ. ＋ ඔබන්න</p>'}
+function restock(id){const n=parseInt(prompt('කීයක් එකතු කරන්නද?','10'));if(!n)return;const i=D.items.find(x=>x.id===id);i.qty+=n;put('items',i);toast('📦 +'+n+' stock එකතු උනා')}
+function rSales(){const f=SD==='today'?s=>s.date===today():SD==='7'?s=>s.date>=ds(6):()=>true;
+ const L=D.sales.filter(f).reverse();
+ $('salesList').innerHTML=`<div class="chips">${chip("SD='today';rSales()",'අද',SD==='today')}${chip("SD='7';rSales()",'දින 7',SD==='7')}${chip("SD='all';rSales()",'සියල්ල',SD==='all')}</div>
+ <div class="card" style="--i:0"><div class="row"><span>එකතුව <b>${R(sum(L,s=>s.price*s.qty))}</b></span><span style="color:var(--ok)">ලාභය <b>${R(sum(L,s=>(s.price-s.cost)*s.qty))}</b></span></div></div>`+
+ L.map((s,k)=>`<div class="card row" style="--i:${Math.min(k+1,9)}"><div><b>${E(s.name)} × ${s.qty}</b><br><small>${s.date}</small></div><div style="text-align:right">${R(s.price*s.qty)}<br><small style="color:var(--ok)">+${R((s.price-s.cost)*s.qty)}</small></div><button class="g" onclick="undo('${s.id}')">↩️</button></div>`).join('')||'<p class="mu" style="text-align:center;margin-top:30px">විකුණුම් නෑ</p>'}
+function undo(id){const s=D.sales.find(x=>x.id===id);if(!s||!confirm('මේ විකුණුම අයින් කරලා stock එක ආපහු දාන්නද?'))return;const i=D.items.find(x=>x.name===s.name);if(i){i.qty+=s.qty;put('items',i)}rm('sales',id);toast('↩️ අයින් කලා')}
+function rRep(){const c={Received:'wn',Repairing:'wn',Ready:'ok',Delivered:'ok'};
+ $('repList').innerHTML=[...D.reps].reverse().map((r,k)=>`<div class="card" style="--i:${Math.min(k,9)}"><div class="row"><b>${E(r.device)}</b><span class="pill ${c[r.status]}">${r.status}</span></div>
+ <small>${E(r.cust)} ${E(r.phone)} • ${r.date}</small><p style="margin:6px 0">${E(r.issue)}</p><div class="row"><b>${R(r.charge)}</b><span>${r.status!=='Delivered'?`<button class="g" onclick="nxt('${r.id}')">➡️</button> `:''}${r.phone?`<button class="s" onclick="wa('${r.id}')">💬</button> `:''}<button class="g" onclick="openR('${r.id}')">✏️</button></span></div></div>`).join('')||'<p class="mu" style="text-align:center;margin-top:30px">Repairs නෑ. ＋ ඔබන්න</p>'}
+function nxt(id){const r=D.reps.find(x=>x.id===id),k=ST.indexOf(r.status);if(k<3){r.status=ST[k+1];put('reps',r);toast('➡️ '+r.status)}}
+function wa(id){const r=D.reps.find(x=>x.id===id);let p=(r.phone||'').replace(/\D/g,'');if(p[0]==='0')p='94'+p.slice(1);
+ const m='Max Electronics 🔧\n'+r.device+' - '+(r.status==='Ready'?'repair එක ඉවරයි, ගන්න පුළුවන්':'status: '+r.status)+'\nගාස්තුව: '+R(r.charge)+'\nස්තූතියි!';
+ open('https://wa.me/'+p+'?text='+encodeURIComponent(m),'_blank')}
+go('home');
+</script></body></html>
