@@ -48,6 +48,7 @@ body::before{content:"";position:fixed;inset:-20%;z-index:-1;background:radial-g
 .three{display:grid;grid-template-columns:2fr 1fr 1fr;gap:8px}nav button{position:relative}
 .bd{position:absolute;top:0;right:22%;background:var(--bad);color:#fff;font-size:10px;border-radius:99px;padding:1px 6px;font-style:normal;animation:pulse 2s infinite}
 .toast{position:fixed;left:50%;bottom:calc(100px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--card2);color:var(--tx);padding:10px 18px;border-radius:99px;z-index:99;box-shadow:0 8px 24px #0006;animation:toast 2.3s both}
+.call{width:100%;margin:4px 0 10px;padding:15px;font-size:17px;background:linear-gradient(135deg,#0ea5e9,#2563eb);box-shadow:0 6px 18px #2563eb44}
 </style></head><body>
 <header><div class="logo">⚡</div><div><h1>MAX ELECTRONICS</h1><small>Repair &amp; Stock Manager</small></div><small id="sy" style="margin-left:auto">📴 Local</small></header>
 
@@ -55,7 +56,7 @@ body::before{content:"";position:fixed;inset:-20%;z-index:-1;background:radial-g
 <section id="t-home" class="tab on"></section>
 <section id="t-stock" class="tab"><input id="q" placeholder="🔍 සොයන්න..." oninput="rStock()"><div id="stockList"></div></section>
 <section id="t-sales" class="tab"><div id="salesList"></div></section>
-<section id="t-rep" class="tab"><div id="repList"></div></section>
+<section id="t-rep" class="tab"><input id="rq" placeholder="🔍 බිල් අංකය / නම / phone / device" oninput="rRep()"><div id="repList"></div></section>
 <section id="t-tools" class="tab">
  <div class="card"><b>💹 Price Calculator</b>
   <label>මිලට ගත් ගාන (Cost)</label><input id="c1" type="number" oninput="calc('c')">
@@ -126,8 +127,8 @@ function rSales(){
  $('salesList').innerHTML=S.map(s=>`<div class="card row"><div><b>${E(s.name)} × ${s.qty}</b><br><small>${s.date}</small></div><div style="text-align:right">${R(s.price*s.qty)}<br><small style="color:var(--ok)">+${R((s.price-s.cost)*s.qty)}</small></div></div>`).join('')||'<p class="mu" style="text-align:center;margin-top:30px">විකුණුම් නෑ</p>'}
 function rRep(){
  const c={Received:'wn',Repairing:'wn',Ready:'ok',Delivered:'ok'};
- $('repList').innerHTML=[...D.reps].reverse().map(r=>`<div class="card"><div class="row"><b>${E(r.device)}</b><span class="pill ${c[r.status]}">${r.status}</span></div>
- <small>${E(r.cust)} ${E(r.phone)} • ${r.date}</small><p style="margin:6px 0">${E(r.issue)}</p><div class="row"><b>${R(r.charge)}</b><button class="g" onclick="openR('${r.id}')">Edit</button></div></div>`).join('')||'<p class="mu" style="text-align:center;margin-top:30px">Repairs නෑ. ＋ ඔබන්න</p>'}
+ $('repList').innerHTML=[...D.reps].reverse().map(r=>`<div class="card"><div class="row"><b>${r.bill?'#'+E(r.bill)+' • ':''}${E(r.device)}</b><span class="pill ${c[r.status]}">${r.status}</span></div>
+ <small>${E(r.cust)} ${E(r.phone)} • ${r.date}</small><p style="margin:6px 0">${E(r.issue)}</p>${r.phone?`<button class="call" onclick="callC('${r.id}')">📞 Call කරන්න • ${E(r.phone)}</button>`:''}<div class="row"><b>${R(r.charge)}</b><button class="g" onclick="openR('${r.id}')">Edit</button></div></div>`).join('')||'<p class="mu" style="text-align:center;margin-top:30px">Repairs නෑ. ＋ ඔබන්න</p>'}
 function cl(){$('m').classList.remove('on')}
 function sh(h){$('sh').innerHTML=h;$('m').classList.add('on')}
 function openF(id){if(tab==='rep')return openR();
@@ -154,14 +155,14 @@ function sell(id){const i=D.items.find(x=>x.id===id);if(!i.qty)return alert('Sto
  <label>විකුණන මිල (එකකට)</label><input id="s2" type="number" value="${i.sale}"><br><button class="s" style="width:100%" onclick="doSell('${id}')">තහවුරු කරන්න</button>`)}
 function doSell(id){const i=D.items.find(x=>x.id===id),q=Math.min(+$('s1').value||1,i.qty);
  i.qty-=q;put('items',i);put('sales',{id:uid(),name:i.name,qty:q,price:+$('s2').value||0,cost:i.cost,date:today()});cl();toast('✅ විකුණුම record උනා')}
-function openR(id){const r=D.reps.find(x=>x.id===id)||{cust:'',phone:'',device:'',issue:'',charge:'',status:'Received'};
- sh(`<h3>🔧 Repair</h3><label>Customer</label><input id="r1" value="${E(r.cust)}"><label>Phone</label><input id="r2" value="${E(r.phone)}">
+function openR(id){const r=D.reps.find(x=>x.id===id)||{bill:nextBill(),cust:'',phone:'',device:'',issue:'',charge:'',status:'Received'};
+ sh(`<h3>🔧 Repair</h3><label>බිල් අංකය (බඩුවේ අලවන එක)</label><input id="r0" value="${E(r.bill)}" inputmode="numeric"><label>Customer</label><input id="r1" value="${E(r.cust)}"><label>Phone</label><input id="r2" value="${E(r.phone)}">
  <label>Device</label><input id="r3" value="${E(r.device)}"><label>ප්‍රශ්නය</label><textarea id="r4">${E(r.issue)}</textarea>
  <label>Charge</label><input id="r5" type="number" value="${r.charge}"><label>Status</label>
  <select id="r6">${['Received','Repairing','Ready','Delivered'].map(s=>`<option ${s===r.status?'selected':''}>${s}</option>`).join('')}</select><br>
  <div class="two"><button onclick="saveR('${id||''}')">Save</button>${id?`<button class="r" onclick="delR('${id}')">Delete</button>`:'<button class="g" onclick="cl()">Cancel</button>'}</div>`)}
-function saveR(id){const o={id:id||uid(),cust:$('r1').value,phone:$('r2').value,device:$('r3').value||'Device',issue:$('r4').value,charge:+$('r5').value||0,status:$('r6').value,date:today()};
- const k=D.reps.findIndex(x=>x.id===id);if(k>=0)o.date=D.reps[k].date;put('reps',o);cl();toast('💾 Save උනා')}
+function saveR(id){const o={id:id||uid(),bill:$('r0').value.trim(),cust:$('r1').value,phone:$('r2').value,device:$('r3').value||'Device',issue:$('r4').value,charge:+$('r5').value||0,status:$('r6').value,date:today()};
+ const k=D.reps.findIndex(x=>x.id===id);if(k>=0)o.date=D.reps[k].date;if(o.bill&&D.reps.some(x=>x.bill===o.bill&&x.id!==o.id)&&!confirm('මේ බිල් අංකය කලින් තියෙනවා. ඒත් save කරන්නද?'))return;put('reps',o);cl();toast('💾 Save උනා')}
 function delR(id){if(confirm('Delete?')){rm('reps',id);cl()}}
 function calc(w){const c=+$('c1').value||0;
  if(w==='p')$('c3').value=(c*(1+(+$('c2').value||0)/100)).toFixed(2);
@@ -217,8 +218,11 @@ function rSales(){const f=SD==='today'?s=>s.date===today():SD==='7'?s=>s.date>=d
  L.map((s,k)=>`<div class="card row" style="--i:${Math.min(k+1,9)}"><div><b>${E(s.name)} × ${s.qty}</b><br><small>${s.date}</small></div><div style="text-align:right">${R(s.price*s.qty)}<br><small style="color:var(--ok)">+${R((s.price-s.cost)*s.qty)}</small></div><button class="g" onclick="undo('${s.id}')">↩️</button></div>`).join('')||'<p class="mu" style="text-align:center;margin-top:30px">විකුණුම් නෑ</p>'}
 function undo(id){const s=D.sales.find(x=>x.id===id);if(!s||!confirm('මේ විකුණුම අයින් කරලා stock එක ආපහු දාන්නද?'))return;const i=D.items.find(x=>x.name===s.name);if(i){i.qty+=s.qty;put('items',i)}rm('sales',id);toast('↩️ අයින් කලා')}
 function rRep(){const c={Received:'wn',Repairing:'wn',Ready:'ok',Delivered:'ok'};
- $('repList').innerHTML=[...D.reps].reverse().map((r,k)=>`<div class="card" style="--i:${Math.min(k,9)}"><div class="row"><b>${E(r.device)}</b><span class="pill ${c[r.status]}">${r.status}</span></div>
- <small>${E(r.cust)} ${E(r.phone)} • ${r.date}</small><p style="margin:6px 0">${E(r.issue)}</p><div class="row"><b>${R(r.charge)}</b><span>${r.status!=='Delivered'?`<button class="g" onclick="nxt('${r.id}')">➡️</button> `:''}${r.phone?`<button class="s" onclick="wa('${r.id}')">💬</button> `:''}<button class="g" onclick="openR('${r.id}')">✏️</button></span></div></div>`).join('')||'<p class="mu" style="text-align:center;margin-top:30px">Repairs නෑ. ＋ ඔබන්න</p>'}
+ $('repList').innerHTML=[...D.reps].reverse().filter(repQ).map((r,k)=>`<div class="card" style="--i:${Math.min(k,9)}"><div class="row"><b>${r.bill?'#'+E(r.bill)+' • ':''}${E(r.device)}</b><span class="pill ${c[r.status]}">${r.status}</span></div>
+ <small>${E(r.cust)} ${E(r.phone)} • ${r.date}</small><p style="margin:6px 0">${E(r.issue)}</p>${r.phone?`<button class="call" onclick="callC('${r.id}')">📞 Call කරන්න • ${E(r.phone)}</button>`:''}<div class="row"><b>${R(r.charge)}</b><span>${r.status!=='Delivered'?`<button class="g" onclick="nxt('${r.id}')">➡️</button> `:''}${r.phone?`<button class="s" onclick="wa('${r.id}')">💬</button> `:''}<button class="g" onclick="openR('${r.id}')">✏️</button></span></div></div>`).join('')||'<p class="mu" style="text-align:center;margin-top:30px">Repairs නෑ. ＋ ඔබන්න</p>'}
+function callC(id){const r=D.reps.find(x=>x.id===id);let p=(r.phone||'').replace(/[^\d+]/g,'');if(p)location.href='tel:'+p}
+function nextBill(){const n=D.reps.map(r=>parseInt(r.bill)).filter(x=>x>0);return n.length?String(Math.max(...n)+1):''}
+function repQ(r){const q=($('rq').value||'').toLowerCase().trim();return !q||[r.bill,r.cust,r.phone,r.device].join(' ').toLowerCase().includes(q)}
 function nxt(id){const r=D.reps.find(x=>x.id===id),k=ST.indexOf(r.status);if(k<3){r.status=ST[k+1];put('reps',r);toast('➡️ '+r.status)}}
 function wa(id){const r=D.reps.find(x=>x.id===id);let p=(r.phone||'').replace(/\D/g,'');if(p[0]==='0')p='94'+p.slice(1);
  const m='Max Electronics 🔧\n'+r.device+' - '+(r.status==='Ready'?'repair එක ඉවරයි, ගන්න පුළුවන්':'status: '+r.status)+'\nගාස්තුව: '+R(r.charge)+'\nස්තූතියි!';
